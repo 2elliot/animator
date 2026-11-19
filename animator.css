@@ -45,6 +45,9 @@ button, select, input { font: inherit; }
   overflow: hidden;
   width: 100vw;
   height: 100vh;
+  /* On tablets and phones, 100vh includes the part hidden behind the
+     browser's toolbar; dvh is the height actually visible. */
+  height: 100dvh;
   background: var(--app-bg);
   color: var(--text);
   font-family: system-ui, sans-serif;
@@ -216,8 +219,7 @@ button, select, input { font: inherit; }
   padding: 0 var(--panel-pad) var(--panel-pad);
 }
 
-.drawing-select,
-.template-select {
+.drawing-select {
   height: 36px;
   padding: 0 8px;
   background: var(--control-bg);
@@ -226,8 +228,6 @@ button, select, input { font: inherit; }
   border-radius: 4px;
   cursor: pointer;
 }
-/* The Templates menu reads as a secondary action under the drawing menu. */
-.template-select { height: 30px; color: var(--text-muted); font-size: 13px; }
 
 .slider-row {
   display: flex;
@@ -548,7 +548,28 @@ html[data-live-number] .cm-content { cursor: ew-resize; }
 .timeline:disabled { opacity: 0.4; cursor: default; }
 .time-readout { min-width: 92px; text-align: right; color: var(--text-muted); font-size: 12px; }
 .dock-label { margin-left: 4px; color: var(--text-muted); }
-.speed-readout { min-width: 40px; text-align: left; }
+/* Run forever: its toggle lights up while on, with the Trail menu beside it. */
+.forever-controls { display: flex; align-items: center; gap: 6px; }
+.forever-btn.on { background: var(--accent); color: #10131c; border-color: var(--accent); }
+.trail-menu {
+  padding: 3px 6px;
+  background: var(--control-bg);
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+/* The speed menu beside the slider, showing the speed in use. */
+.speed-menu {
+  padding: 3px 6px;
+  background: var(--control-bg);
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
 
 .round-btn {
   width: 40px;
@@ -647,4 +668,144 @@ html[data-live-number] .cm-content { cursor: ew-resize; }
     transition-duration: 1ms !important;
     transition-delay: 0s !important;
   }
+}
+
+/* ── The Explore gallery (the Explorer extension) ─────────────────────────── */
+
+/* A bright button at the top left of the canvas, and the gallery it opens
+   below it. The gallery stops above the dock and scrolls inside. */
+.explore {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - var(--dock-space, 112px) - 40px);
+  pointer-events: none;
+}
+.explore > * { pointer-events: auto; }
+/* With the side panel hidden, clear its edge tab. */
+.app.code-hidden .explore { left: 60px; max-width: calc(100% - 76px); }
+.explore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 18px;
+  background: var(--accent);
+  color: #0a0a14;
+  border: none;
+  border-radius: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.explore-btn:hover { filter: brightness(1.08); }
+.explore-btn svg { width: 18px; height: 18px; }
+.explore-gallery {
+  width: 600px;
+  max-width: 100%;
+  min-height: 0;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 14px 16px 16px;
+  background: rgba(21, 21, 43, 0.98);
+  border: 1px solid var(--control-border);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fade-up 180ms var(--ease-out) both;
+}
+.explore-head { display: flex; align-items: center; gap: 8px; }
+.explore-title { flex: 1; color: var(--text); font-size: 15px; font-weight: 600; }
+.explore-group-title {
+  margin: 4px 0 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.explore-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.explore-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  background: #1f1f3a;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+}
+.explore-tile:hover, .explore-tile:focus-visible { border-color: var(--accent); }
+.explore-preview {
+  height: 84px;
+  background: #0a0a14;
+  border-radius: 6px;
+  overflow: hidden;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.explore-preview svg { display: block; width: 100%; height: 100%; }
+.explore-label { display: flex; align-items: center; gap: 6px; padding: 0 2px; }
+.explore-new {
+  padding: 1px 7px;
+  background: #ffc27a;
+  color: #1a1a2e;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+/* The floating Variables card sits below the Explore button. */
+.app.code-hidden .variables-card { top: 72px; max-height: calc(100% - var(--dock-space, 112px) - 98px); }
+.canvas-area:fullscreen .variables-card { top: 14px; }
+
+/* ── Small screens ──────────────────────────────────────────────────────── */
+
+/* The animation area is a size container, so the dock can fit itself to the
+   space beside the panel, however wide the window. At desktop sizes the
+   panel leaves the dock all the room it needs, so none of this applies. */
+.canvas-area { container-type: inline-size; container-name: stage; }
+
+/* A narrow stage: the dock wraps onto two rows instead of spilling past the
+   stage's edges, and the drawing keeps clear of the taller dock. */
+@container stage (max-width: 700px) {
+  .dock { max-width: calc(100% - 16px); white-space: normal; }
+  .dock-row { flex-wrap: wrap; justify-content: center; row-gap: 8px; }
+  .dock-label { display: none; }
+  .dock-row input[type=range] { width: 120px; }
+  .canvas { --dock-space: 200px; }
+  .explore-btn { height: 40px; padding: 0 14px; }
+}
+
+/* Phones: the side panel slides over the animation, like
+   a drawer, instead of squeezing it, and the animation keeps the full width.
+   The edge tab still opens and closes it. */
+@media (max-width: 600px) {
+  .code-col {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(var(--side-actual), calc(100vw - 56px));
+    z-index: 30;
+    box-shadow: 12px 0 32px rgba(0, 0, 0, 0.5);
+  }
+  .app.code-hidden .code-col { margin-left: calc(-1 * min(var(--side-actual), calc(100vw - 56px))); }
+  .canvas-area { width: 100%; }
+}
+
+/* Touch screens: bigger targets for the small round buttons. */
+@media (pointer: coarse) {
+  .round-btn.small { width: 40px; height: 40px; }
 }
