@@ -810,3 +810,4 @@ html[data-live-number] .cm-content { cursor: ew-resize; }
   .round-btn.small { width: 40px; height: 40px; }
 }
 .forever-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.error-hint { margin: 6px 0 0; color: var(--text-muted); font-size: 12px; }
