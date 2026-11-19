@@ -809,3 +809,4 @@ html[data-live-number] .cm-content { cursor: ew-resize; }
 @media (pointer: coarse) {
   .round-btn.small { width: 40px; height: 40px; }
 }
+.forever-btn:disabled { opacity: 0.4; cursor: not-allowed; }
